@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Smart StockBot - Admin Panel</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-cog"></i> Admin Panel - Smart StockBot</h1>
+        </header>
+
+        <div class="admin-panel">
+            <h2><i class="fas fa-cog"></i> Admin Panel</h2>
+            <div class="admin-sections">
+                <div class="add-product">
+                    <h3>Add New Product</h3>
+                    <select id="itemType">
+                        <option value="individual">Individual Bottle</option>
+                        <option value="case">Full Case</option>
+                    </select>
+                    <input type="text" id="brand" placeholder="Brand (Sprite/Thumbs Up)" />
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                        <div style="flex: 1;">
+                            <label for="volumeLiters" style="display: block; margin-bottom: 5px; font-weight: bold;">Volume (Liters):</label>
+                            <input type="number" id="volumeLiters" placeholder="0.0" step="0.1" min="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;" />
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="volume" style="display: block; margin-bottom: 5px; font-weight: bold;">Volume (ml):</label>
+                            <input type="number" id="volume" placeholder="0" min="0" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px;" />
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <button type="button" onclick="convertVolume()" style="background: linear-gradient(45deg, #3498db, #2980b9); color: white; padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                            <i class="fas fa-exchange-alt"></i> Convert Between Units
+                        </button>
+                    </div>
+                    <input type="number" id="quantity" placeholder="Stock Quantity" />
+                    <input type="number" id="price" placeholder="Price per unit" />
+                    <input type="number" id="bottlesPerCase" placeholder="Bottles per case (for cases)" style="display:none;" />
+                    <button onclick="addProduct()">Add Product</button>
+                    <br/><br/>
+                    <label for="excelFileInput">Import Stock Data from Excel:</label>
+                    <input type="file" id="excelFileInput" accept=".csv" />
+                </div>
+
+                <div class="stock-management">
+                    <h3>Current Stock</h3>
+                    <button onclick="exportCSV()">Export Stock Data</button>
+                    <div class="stock-tables">
+                        <div class="individual-stock">
+                            <h4>Individual Bottles</h4>
+                            <div id="individualStockDisplay"></div>
+                            <div style="margin-top: 10px;">
+                                <label for="removeIndividualBrand">Brand:</label>
+                                <select id="removeIndividualBrand"></select>
+                                <label for="removeIndividualVolume">Volume (ml):</label>
+                                <select id="removeIndividualVolume"></select>
+                                <label for="removeIndividualQuantity">Quantity to Remove:</label>
+                                <select id="removeIndividualQuantity"></select>
+                                <button onclick="removeIndividualStock()">Remove</button>
+                            </div>
+                        </div>
+                        <div class="case-stock">
+                            <h4>Full Cases</h4>
+                            <div id="caseStockDisplay"></div>
+                            <div style="margin-top: 10px;">
+                                <label for="removeCaseBrand">Brand:</label>
+                                <select id="removeCaseBrand"></select>
+                                <label for="removeCaseVolume">Volume (ml):</label>
+                                <select id="removeCaseVolume"></select>
+                                <label for="removeCaseQuantity">Quantity to Remove:</label>
+                                <select id="removeCaseQuantity"></select>
+                                <button onclick="removeCaseStock()">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Items Display Section (from index.html) -->
+        <div class="product-display-section" style="margin-top: 30px; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+            <h2 style="color: #2d3436; margin-bottom: 30px; text-align: center;"><i class="fas fa-boxes"></i> Stock Items Display</h2>
+            
+            <!-- Individual Bottles Section -->
+            <div class="product-grid" style="margin-bottom: 40px;">
+                <h3 style="color: #2d3436; margin-bottom: 20px; font-size: 1.5em;"><i class="fas fa-wine-bottle"></i> Individual Bottles</h3>
+                <div class="products" id="individualProducts">
+                    <!-- Individual bottle products will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Full Cases Section -->
+            <div class="product-grid">
+                <h3 style="color: #2d3436; margin-bottom: 20px; font-size: 1.5em;"><i class="fas fa-box"></i> Full Cases</h3>
+                <div class="products" id="caseProducts">
+                    <!-- Full case products will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="sales-report">
+            <h2><i class="fas fa-chart-line"></i> Sales Report</h2>
+            <div id="salesReport"></div>
+            <div style="margin-top: 20px;">
+                <button onclick="createSampleTransactions(); displayTransactionHistory();" style="background: linear-gradient(45deg, #9b59b6, #8e44ad); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-right: 10px;">
+                    <i class="fas fa-plus"></i> Create Sample Transactions
+                </button>
+                <button onclick="localStorage.removeItem('transactions'); transactions = []; displayTransactionHistory();" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-trash"></i> Clear All Transactions
+                </button>
+                <button onclick="resetProductIds()" style="background: linear-gradient(45deg, #f39c12, #e67e22); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
+                    <i class="fas fa-refresh"></i> Reset Product IDs (Fix Quantity Issue)
+                </button>
+            </div>
+        </div>
+
+        <div class="transaction-history">
+            <h2><i class="fas fa-history"></i> Transaction History</h2>
+            <div class="transaction-controls">
+                <div class="filter-section">
+                    <label for="transactionFilter">Filter by:</label>
+                    <select id="transactionFilter">
+                        <option value="all">All Transactions</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                    <button onclick="filterTransactions()">Apply Filter</button>
+                    <button onclick="exportTransactionHistory()">Export to CSV</button>
+                </div>
+            </div>
+            <div class="transaction-stats">
+                <div class="stat-card">
+                    <i class="fas fa-dollar-sign"></i>
+                    <div>
+                        <h4>Total Revenue</h4>
+                        <span id="totalRevenue">$0.00</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-shopping-cart"></i>
+                    <div>
+                        <h4>Total Transactions</h4>
+                        <span id="totalTransactions">0</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-box"></i>
+                    <div>
+                        <h4>Items Sold</h4>
+                        <span id="itemsSold">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="transaction-table-container">
+                <table id="transactionTable">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Date & Time</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total Amount</th>
+                            <th>Payment Method</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+                        <!-- Transaction data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="transactionDetailsModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeTransactionModal()">&times;</span>
+                    <h3>Transaction Details</h3>
+                    <div id="transactionDetailsContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-link">Back to Shopping</a>
+    </div>
+
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

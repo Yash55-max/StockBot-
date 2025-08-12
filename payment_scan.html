@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scan QR Code - Payment - Smart StockBot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: rgba(0,0,0,0.7);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(104, 110, 195, 0.37);
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .instructions {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .instructions h3 {
+            color: #00b894;
+            margin-top: 0;
+        }
+        .instructions ul {
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+            color: #ddd;
+        }
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+        .qr-container img {
+            max-width: 250px;
+            height: auto;
+            border-radius: 5px;
+        }
+        .payment-button {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+            color: #121212;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        .payment-button:hover {
+            background: linear-gradient(45deg, #00cec9, #00b894);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .payment-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .back-button {
+            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+            color: #00b894;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 184, 148, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #00b894;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-qrcode"></i> Scan QR Code for Payment</h1>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> Payment Instructions</h3>
+            <ul>
+                <li>Open your UPI payment app (Google Pay, PhonePe, Paytm, etc.)</li>
+                <li>Tap on "Scan QR Code" or "Scan & Pay"</li>
+                <li>Point your camera at the QR code below</li>
+                <li>Enter the exact amount shown in your cart</li>
+                <li>Complete the payment using your UPI PIN</li>
+                <li>Click "Payment Received" once payment is successful</li>
+            </ul>
+        </div>
+
+        <div class="qr-container">
+            <img src="images/frame.jpg" alt="Payment QR Code" id="qrCode" />
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Verifying payment...</p>
+        </div>
+
+        <button class="payment-button" id="paymentButton" onclick="confirmPayment()">
+            <i class="fas fa-check-circle"></i> Payment Received
+        </button>
+
+        <button class="back-button" onclick="window.location.href='transaction.html'">
+            <i class="fas fa-arrow-left"></i> Back to Transaction
+        </button>
+    </div>
+
+    <script>
+        // Generate unique transaction ID
+        function generateTransactionId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `TXN-${timestamp}-${random}`;
+        }
+        
+        // Get cart total from localStorage
+        function getCartTotal() {
+            const cartData = localStorage.getItem('cart');
+            if (!cartData || cartData === '[]') return 0;
+            
+            try {
+                const cart = JSON.parse(cartData);
+                return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+            } catch (error) {
+                console.error('Error calculating cart total:', error);
+                return 0;
+            }
+        }
+
+        // Simulate payment verification
+        function confirmPayment() {
+            const button = document.getElementById('paymentButton');
+            const loading = document.getElementById('loading');
+            const cartTotal = getCartTotal();
+            
+            if (cartTotal === 0) {
+                alert('Your cart is empty! Please add items before payment.');
+                return;
+            }
+
+            button.disabled = true;
+            loading.style.display = 'block';
+
+            // Simulate payment processing
+            setTimeout(() => {
+                loading.style.display = 'none';
+                
+                // Store payment confirmation
+                const paymentData = {
+                    amount: cartTotal,
+                    timestamp: new Date().toISOString(),
+                    method: 'UPI',
+                    status: 'success'
+                };
+                localStorage.setItem('paymentConfirmation', JSON.stringify(paymentData));
+                
+                // Create transaction record for UPI payment
+                let transaction = null;
+                const pendingTransaction = JSON.parse(localStorage.getItem('pendingTransaction') || '{}');
+                if (pendingTransaction.cart) {
+                    transaction = {
+                        id: generateTransactionId(),
+                        date: new Date().toISOString(),
+                        customer: pendingTransaction.name || 'Walk-in Customer',
+                        mobile: pendingTransaction.mobile || '',
+                        address: pendingTransaction.address || '',
+                        items: pendingTransaction.cart.map(item => ({
+                            id: item.id,
+                            type: item.type,
+                            brand: item.brand,
+                            volume: item.volume,
+                            quantity: item.quantity,
+                            price: item.price,
+                            total: item.price * item.quantity
+                        })),
+                        totalAmount: cartTotal,
+                        paymentMethod: 'UPI',
+                        status: 'Completed'
+                    };
+                    
+                    // Save transaction to localStorage
+                    const existingTransactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+                    existingTransactions.push(transaction);
+                    localStorage.setItem('transactions', JSON.stringify(existingTransactions));
+                    
+                    // Clear pending transaction
+                    localStorage.removeItem('pendingTransaction');
+                }
+                
+                alert(`✅ Payment Successful!\n\nAmount: ₹${cartTotal.toFixed(2)}\nPayment Method: UPI\nTransaction ID: ${transaction ? transaction.id : 'N/A'}\n\nYou will be redirected to complete your transaction.`);
+                
+                // Redirect to transaction page with success parameter
+                window.location.href = 'transaction.html?payment=success';
+            }, 3000);
+        }
+
+        // Check if coming from successful payment
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment') === 'success') {
+                const paymentData = localStorage.getItem('paymentConfirmation');
+                if (paymentData) {
+                    console.log('Payment confirmed:', JSON.parse(paymentData));
+                }
+            }
+        });
+    </script>
+</body>
+</html>
