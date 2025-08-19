@@ -1,7 +1,6 @@
 # Smart StockBot - Inventory Management System
 
 A web-based inventory management system for tracking soft drink stock with separate sections for individual bottles and full cases.
-![StockBot Dashboard](STOCKBOT-Homepage.png)
 
 ## Features
 
@@ -61,6 +60,7 @@ case,Sprite,100,5,300,12
 4. Start managing your inventory with separate tracking for both types!
 
 The system now supports both individual bottle sales and full case management with automatic stock reduction for each type.
+
 
 
 
