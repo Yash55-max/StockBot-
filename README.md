@@ -1,6 +1,7 @@
 # Smart StockBot - Inventory Management System
 
 A web-based inventory management system for tracking soft drink stock with separate sections for individual bottles and full cases.
+The website can be accessed through the link :- https://stock-bot-two.vercel.app/
 
 ## Features
 
@@ -12,7 +13,7 @@ A web-based inventory management system for tracking soft drink stock with separ
 - **Indian Rupees**: All prices displayed in ₹ (Indian Rupees)
 - **Visual Interface**: Clean, responsive web interface with dual stock displays
 
-## How to Use
+## How to Use through device :- 
 
 1. **Open the Website**: Open `index.html` in your web browser
 2. **Load Initial Data**: 
